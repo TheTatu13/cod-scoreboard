@@ -4,15 +4,18 @@
 > Generator de date sintetice cu defecte controlate → MySQL (sursă) → pipeline ELT în
 > PostgreSQL (dbt, Airflow) → dashboard și API.
 
-**Stare:** în lucru (săptămâna 1 din 13). Roadmap complet: [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Stare:** în lucru (săptămânile 1–3 din 13 gata: generator, teste, feed cu defecte). Roadmap complet: [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
-<!-- badge CI: adaugă după primul push, formatul e în tab-ul Actions → Create status badge -->
+![CI](https://github.com/TheTatu13/cod-scoreboard/actions/workflows/ci.yml/badge.svg)
 
 ## Problema
 
-TODO (3 propoziții, cu vorbele tale): ce simulează proiectul, ce întrebări analitice
-trebuie să poată răspunde (ex. cine e cel mai bun jucător pe Hardpoint, ce hartă dă cele mai
-multe kill-uri) și de ce datele trebuie validate.
+Proiectul simulează 1.500 de meciuri Call of Duty între 15.000 de jucători, cu arme, hărți și
+arhetipuri de jucători care influențează rezultatele (K/D mediu de la sub 1 la peste 2). Din date
+trebuie să poți afla ce hartă dă cele mai multe kill-uri, cine e cel mai bun jucător pe un mod de
+joc și cum se compară armele. Datele reale vin murdare (duplicate, evenimente întârziate, ID-uri
+inexistente, scheme schimbate), așa că proiectul le injectează controlat și verifică, cu un
+manifest ca adevăr de comparat, că pipeline-ul le prinde pe toate.
 
 ## Arhitectura țintă
 
@@ -27,13 +30,27 @@ Detalii în [`docs/ROADMAP.md`](docs/ROADMAP.md). Planul de calitate a datelor:
 
 ## Pornire rapidă
 
-Necesită Docker Desktop și Python 3.12.
+Necesită Python 3.12 (merge și 3.14) și MySQL 8, fie în Docker, fie instalat local.
 
 ```bash
 cp .env.example .env            # apoi pune propria parolă în .env
-docker compose up -d            # MySQL pe portul 3307, schema încărcată automat
-pip install -r requirements.txt && pytest -q
+pip install -r requirements.txt
 ```
+
+**Cu Docker:** `docker compose up -d` pornește MySQL pe portul 3307 și încarcă schema automat.
+
+**Fără Docker (MySQL local):** creează o bază separată și încarcă schema din
+`sql/schema/01_schema.sql`, apoi pune în `.env`: `MYSQL_DATABASE=cod_dev` și `MYSQL_HOST_PORT=3306`.
+
+Apoi (PowerShell: `$env:PYTHONPATH="src"`; bash: `export PYTHONPATH=src`):
+
+```bash
+python -m cod.generator --seed 42 --reset      # golește tabelele și generează datele
+python -m cod.generator.events --seed 42       # feed-ul JSON cu defecte, în data/events/
+pytest -q                                      # teste pe simulare, pe date și pe defecte
+```
+
+Același seed produce exact aceleași date. `--reset` golește toate tabelele din baza din `.env`.
 
 ## Structura
 
