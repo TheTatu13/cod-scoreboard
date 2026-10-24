@@ -1,0 +1,21 @@
+# secrete și configurări locale
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# date generate (se regenerează din generator + seed, nu se comit)
+data/
+*.dump
+*.csv
+
+# editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
