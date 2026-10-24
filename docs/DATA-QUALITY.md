@@ -34,3 +34,29 @@ testele reproductibile și e un argument bun la interviu.
 Scrie explicit: datele sunt sintetice, erorile sunt injectate controlat și nu estimează
 realitatea. Avantajul real: ai „ground truth" (știi ce defecte ai pus), deci poți demonstra
 că pipeline-ul le prinde, lucru pe care datele reale nu ți-l dau.
+
+---
+
+## Feed-ul cu defecte (implementat, săptămâna 3)
+
+```
+python -m cod.generator.events --seed 42 --out data/events        # cu defecte
+python -m cod.generator.events --seed 42 --out data/events --clean # fără defecte
+```
+
+Citește kill-urile din MySQL (curat) și scrie `data/events/dt=<zi de livrare>/kills.jsonl`,
+plus `_manifest.json` cu adevărul: ce eveniment a fost stricat și cum. Același seed → fișiere identice.
+
+| Defect | Ce se întâmplă | Cum îl prinde pipeline-ul |
+|---|---|---|
+| duplicate | același `event_id` de două ori | dedup pe `event_id` |
+| late | ajunge într-o zi de livrare ulterioară | `event_time` ≠ `dt=` din folder |
+| orphan_victim | `victim_id` inexistent în player | FK check → `rejected_*` |
+| self_kill | `killer_id` = `victim_id` | regulă de business → `rejected_*` |
+| ts_out_of_range | `timestamp_in_match` < 0 sau > durata meciului | regulă → `rejected_*` |
+| dirty_weapon | `"  ak-47 "`, `"M4A1"` cu litere schimbate | normalizare + potrivire cu `weapon` |
+| missing_field | `victim_id` sau `weapon` null | not-null → `rejected_*` |
+| schema_drift | de la o dată, `is_headshot` → `headshot`, apare `client_version` | citire tolerantă la schemă |
+
+Reconcilierea zilnică din plan: `citite = încărcate + respinse (+ duplicate eliminate)`; manifestul îți
+dă numerele exacte cu care compari.
