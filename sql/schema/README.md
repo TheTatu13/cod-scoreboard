@@ -9,3 +9,7 @@ Export (Git Bash, din rădăcina repo-ului):
 
 Dacă modifici schema după prima pornire: `docker compose down -v && docker compose up -d`
 (`-v` șterge volumul, deci și datele; ele se regenerează din generator + seed).
+
+`02_views.sql` și `03_indexes.sql` rulează automat după `01_schema.sql` (ordine alfabetică).
+Pe o bază deja creată, încarcă-le manual: `mysql -u root -p cod_scoreboard < sql/schema/02_views.sql`
+(`03_indexes.sql` o singură dată: `ADD INDEX` dă eroare dacă indexul există).

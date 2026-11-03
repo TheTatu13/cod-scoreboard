@@ -4,7 +4,7 @@
 > Generator de date sintetice cu defecte controlate → MySQL (sursă) → pipeline ELT în
 > PostgreSQL (dbt, Airflow) → dashboard și API.
 
-**Stare:** în lucru (săptămânile 1–3 din 13 gata: generator, teste, feed cu defecte). Roadmap complet: [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Stare:** în lucru (săptămânile 1–3 din 13 gata: generator, teste, feed cu defecte; plus views și query-uri analitice, Faza 2). Roadmap complet: [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ![CI](https://github.com/TheTatu13/cod-scoreboard/actions/workflows/ci.yml/badge.svg)
 
@@ -62,6 +62,28 @@ tests/            teste (invarianți pe date, smoke)
 docs/             roadmap, calitatea datelor, ERD, data dictionary, optimizări
 .github/workflows CI (ruff + pytest)
 ```
+
+## Views și query-uri analitice
+
+Views (`sql/schema/02_views.sql`): `v_player_stats`, `v_map_stats`, `v_weapon_stats`,
+`v_archetype_stats` (plus `v_player_leaderboard`, în schema de bază). Query-urile din
+`sql/queries/`, fiecare cu întrebarea de business în primele rânduri:
+
+| Fișier | Întrebare |
+|---|---|
+| `01_top_player_per_mode` | Cel mai bun jucător (K/D) pe fiecare mod de joc |
+| `02_maps_by_kills_per_match` | Hărțile cu cele mai multe kill-uri pe meci |
+| `03_weapon_categories` | Compararea categoriilor de arme (kill-uri, headshot) |
+| `04_archetype_comparison` | Cât influențează arhetipul K/D-ul |
+| `05_inactive_players` | Câți jucători nu au jucat niciun meci |
+| `06_unused_weapons` | Arme fără niciun kill (ar fi un semnal în generator) |
+| `07_team_win_rate` | Ce echipă câștigă mai des, pe mod |
+| `08_monthly_activity` | Meciuri și kill-uri pe lună |
+| `09_top_headshot_players` | Cel mai mare procent de headshot (min. 100 kill-uri) |
+
+Două indexuri acoperitoare (`sql/schema/03_indexes.sql`), cu măsurătorile din
+[`docs/optimization/faza-2-indexuri.md`](docs/optimization/faza-2-indexuri.md).
+Testele din `tests/test_views.py` compară fiecare view cu un calcul independent pe tabelele de bază.
 
 ## Date sintetice
 
