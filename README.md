@@ -4,7 +4,7 @@
 > Generator de date sintetice cu defecte controlate → MySQL (sursă) → pipeline ELT în
 > PostgreSQL (dbt, Airflow) → dashboard și API.
 
-**Stare:** în lucru (săptămânile 1–3 din 13 gata: generator, teste, feed cu defecte; plus views și query-uri analitice, Faza 2). Roadmap complet: [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Stare:** în lucru (săptămânile 1–3 din 13 gata: generator, teste, feed cu defecte; plus views și query-uri analitice, Faza 2, și ingestia în PostgreSQL, Faza 3). Roadmap complet: [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ![CI](https://github.com/TheTatu13/cod-scoreboard/actions/workflows/ci.yml/badge.svg)
 
@@ -56,12 +56,25 @@ Același seed produce exact aceleași date. `--reset` golește toate tabelele di
 
 ```
 src/cod/          cod Python (conexiune DB, generator, ingestie)
+sql/warehouse/    schema raw din PostgreSQL (rulată de `cod.ingest`)
 sql/schema/       schema MySQL (rulată automat de Docker)
 sql/queries/      interogări analitice, fiecare cu întrebarea de business
 tests/            teste (invarianți pe date, smoke)
 docs/             roadmap, calitatea datelor, ERD, data dictionary, optimizări
 .github/workflows CI (ruff + pytest)
 ```
+
+## Ingestia în PostgreSQL
+
+Pornește și PostgreSQL (`docker compose up -d` pornește ambele baze, portul 5433), apoi:
+
+```bash
+python -m cod.generator.events --seed 42 --out data/events   # feed-ul JSON cu defecte
+python -m cod.ingest                                         # MySQL + JSON -> PostgreSQL raw
+```
+
+Incrementală (watermark) și idempotentă: aceeași zi de două ori dă aceleași rânduri. Detalii și
+verificarea pe manifestul de defecte: [`docs/INGESTIE.md`](docs/INGESTIE.md).
 
 ## Views și query-uri analitice
 
@@ -95,6 +108,6 @@ Defectele sunt injectate intenționat și nu reprezintă date reale.
 
 - [ ] Fundația: Docker, generator cu `--seed`, teste, CI (`docs/WEEKS-1-2.md`)
 - [ ] Generator ca sistem-sursă, cu defecte controlate
-- [ ] Ingestie incrementală și idempotentă
+- [x] Ingestie incrementală și idempotentă
 - [ ] dbt: staging, marts, teste
 - [ ] Airflow, dashboard, API

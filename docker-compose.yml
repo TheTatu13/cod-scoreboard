@@ -19,5 +19,23 @@ services:
       timeout: 3s
       retries: 20
 
+  postgres:
+    image: postgres:16
+    container_name: cod-postgres
+    environment:
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_DB: ${PG_DATABASE:-cod_warehouse}
+    ports:
+      # 5433 pe host, ca să nu se bată cu un PostgreSQL instalat local (5432)
+      - "${PG_PORT:-5433}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ${PG_DATABASE:-cod_warehouse}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
 volumes:
   mysql_data:
+  pg_data:
