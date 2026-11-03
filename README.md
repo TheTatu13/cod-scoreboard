@@ -100,9 +100,9 @@ Testele din `tests/test_views.py` compară fiecare view cu un calcul independent
 
 ## Date sintetice
 
-Datele sunt generate de un simulator (5.000 de jucători, dintre care 500 activi în meciuri,
-1000 de meciuri, ~60.000 de kill-uri). Arhetipurile de jucători (9 planificate) sunt în lucru.
-Defectele sunt injectate intenționat și nu reprezintă date reale.
+Datele sunt generate de un simulator (implicit 15.000 de jucători, dintre care 500 activi în meciuri,
+1.500 de meciuri, ~89.000 de kill-uri). Arhetipurile de jucători (9, plus `Recrut` ca valoare
+implicită) influențează K/D-ul. Defectele sunt injectate intenționat și nu reprezintă date reale.
 
 ## Ce urmează
 

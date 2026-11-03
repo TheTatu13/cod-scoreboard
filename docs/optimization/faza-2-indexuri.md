@@ -1,7 +1,8 @@
 # Faza 2: două indexuri acoperitoare pe `kill_table`
 
-Date: seed 42, 89.427 kill-uri, MySQL 8.0. Timpii sunt dintr-o singură rulare `EXPLAIN ANALYZE`
-și variază de la o rulare la alta; contează diferența de plan, nu cifra exactă.
+Date: seed 42, 89.427 kill-uri, MySQL 8.0. Timpii sunt intervale din 5 rulări `EXPLAIN ANALYZE`,
+măsurate pe aceeași bază cu indexul forțat (`USE INDEX`) sau ignorat (`IGNORE INDEX`). Variază de la
+o rulare la alta; contează diferența de plan, nu cifra exactă.
 
 ## Problema
 
@@ -17,8 +18,8 @@ prin index, dar trebuia să se întoarcă în tabel după `is_headshot`.
 
 | Interogare | Plan | Timp |
 |---|---|---|
-| per armă | `Index scan on kill_table using weapon_id` | ~116 ms |
-| per jucător | `Table scan on k` | ~147 ms |
+| per armă | `Index scan on kill_table using weapon_id` | 89–115 ms |
+| per jucător | fără indexul acoperitor (`Table scan on k`, în prima măsurare) | 168–183 ms |
 
 ## Indexul
 
@@ -34,8 +35,8 @@ Un index care conține **toate coloanele de care are nevoie interogarea** se num
 
 | Interogare | Plan | Timp |
 |---|---|---|
-| per armă | `Covering index scan using idx_kill_weapon_headshot` | ~26 ms (de ~4 ori mai rapid) |
-| per jucător | `Covering index scan on k using idx_kill_killer_headshot` | ~96 ms (~35% mai rapid) |
+| per armă | `Covering index scan using idx_kill_weapon_headshot` | 20–22 ms (de ~4–5 ori mai rapid) |
+| per jucător | `Covering index scan on k using idx_kill_killer_headshot` | 102–106 ms (~40% mai rapid) |
 
 ## Costuri și limite
 
